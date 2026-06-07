@@ -386,6 +386,11 @@ const rotateData = {
     radiusX: 0,
     radiusY: 70,
 };
+
+const DEPTH_SORT_INTERVAL = 2;
+var drumBalls = [];
+var drumDepthOrder = [];
+var drumDepthFrame = 0;
   
 
 async function fetchDrawData() {
@@ -654,7 +659,7 @@ function tick(event) {
     }
 
     // Si está visible el sorteo normal
-    updateGame();
+    updateGame(event.delta);
 
     if (renderActive || renderOnce) {
         stage.update(event);
@@ -1282,9 +1287,9 @@ function revealBall(){
  * UPDATE GAME - This is the function that runs to loop game update
  * 
  */
-function updateGame(){
+function updateGame(deltaMs){
 	
-	if(!gameData.paused) loopDrumBalls()
+	if(!gameData.paused) loopDrumBalls(deltaMs)
 	
 }
 
@@ -1297,56 +1302,58 @@ function buildDrumBalls(){
 	rotateData.column = 6;
 	rotateData.row = 6;
 	rotateData.drumGap = 100 / rotateData.row;
+	drumBalls = [];
+	drumDepthOrder = [];
+	drumDepthFrame = 0;
+	$.balls = {};
 
 	var numberIndex = 0;
 
 	for(var r=0; r<rotateData.row; r++){
 		for(var c=0; c<rotateData.column; c++){
-			$.balls[r+'_'+c] = createBall('ballDrum', gameData.numbers[numberIndex]);
+			var ball = createBall('ballDrum', gameData.numbers[numberIndex]);
+			$.balls[r+'_'+c] = ball;
 			numberIndex++;
 
-			$.balls[r+'_'+c].angle = $.balls[r+'_'+c].oriAngle = (r * ((Math.PI * 2) / rotateData.row));
-			$.balls[r+'_'+c].offsetX = $.balls[r+'_'+c].newOffsetX = randomIntFromInterval(-80,80);
-			$.balls[r+'_'+c].offsetY = $.balls[r+'_'+c].newOffsetY = randomIntFromInterval(-20,20);
-			$.balls[r+'_'+c].rotateX = 0;
-			$.balls[r+'_'+c].rotateY = 0;
-			$.balls[r+'_'+c].rotateSpeedX = randomIntFromInterval(-2,2);
-			$.balls[r+'_'+c].rotateSpeedY = randomIntFromInterval(-2,2);
-			$.balls[r+'_'+c].timer = randomIntFromInterval(50,100);
-			$.balls[r+'_'+c].timerRotate = randomIntFromInterval(30,50);
-			drawDrumBallsContainer.addChild($.balls[r+'_'+c]);
+			ball.angle = ball.oriAngle = (r * ((Math.PI * 2) / rotateData.row));
+			ball.offsetX = ball.newOffsetX = randomIntFromInterval(-80,80);
+			ball.offsetY = ball.newOffsetY = randomIntFromInterval(-20,20);
+			ball.rotateX = 0;
+			ball.rotateY = 0;
+			ball.rotateSpeedX = randomIntFromInterval(-2,2);
+			ball.rotateSpeedY = randomIntFromInterval(-2,2);
+			ball.timer = randomIntFromInterval(50,100);
+			ball.timerRotate = randomIntFromInterval(30,50);
+			ball.depthEntry = {ball:ball, scale:0};
+			drumBalls.push(ball);
+			drumDepthOrder.push(ball.depthEntry);
+			drawDrumBallsContainer.addChild(ball);
 		}
 	}
 }
 
-function loopDrumBalls(){
+function loopDrumBalls(deltaMs){
     var drumSpeed = gameData.drawing == false ? rotateData.normalSpeed : rotateData.revealSpeed;
+	var frameFactor = Math.min((deltaMs || 16.67) / 16.67, 2);
 
     // No crear TweenMax aquí
-    rotateData.speed += (drumSpeed - rotateData.speed) * 0.05;
+    rotateData.speed += (drumSpeed - rotateData.speed) * 0.05 * frameFactor;
 
-    rotateData.angle += rotateData.speed;
+    rotateData.angle += rotateData.speed * frameFactor;
     rotateData.angle = rotateData.angle > (Math.PI * 2) ? 0 : rotateData.angle;
 
-    var sortArray = [];
+    for(var n=0; n<drumBalls.length; n++){
+			var ball = drumBalls[n];
+			var currentAngle = ball.oriAngle + rotateData.angle;
+			var cosAngle = Math.cos(currentAngle);
+			var posX = cosAngle * rotateData.radiusX;
+			var posY = Math.sin(currentAngle) * rotateData.radiusY;
+			var scale = ((cosAngle * rotateData.depth) / rotateData.radiusY) + rotateData.scale;
 
-    for(var r=0; r<rotateData.row; r++){
-        for(var c=0; c<rotateData.column; c++){
-
-            var key = r + '_' + c;
-            var ball = $.balls[key];
-
-            var currentAngle = ball.angle;
-            var posX = Math.cos(currentAngle) * rotateData.radiusX;
-            var posY = Math.sin(currentAngle) * rotateData.radiusY;
-
-            var currentScale = Math.cos(currentAngle) * rotateData.depth;
-            var scale = (currentScale / rotateData.radiusY) + rotateData.scale;
-
-            sortArray.push({r:r, c:c, scale:scale});
+			ball.depthEntry.scale = scale;
 
             if(ball.timer > 0){
-                ball.timer--;
+                ball.timer -= frameFactor;
             }else{
                 ball.timer = randomIntFromInterval(50,100);
                 ball.newOffsetX = randomIntFromInterval(-80,80);
@@ -1354,19 +1361,19 @@ function loopDrumBalls(){
             }
 
             // Movimiento suave sin TweenMax
-            ball.offsetX += (ball.newOffsetX - ball.offsetX) * 0.02;
-            ball.offsetY += (ball.newOffsetY - ball.offsetY) * 0.02;
+            ball.offsetX += (ball.newOffsetX - ball.offsetX) * 0.02 * frameFactor;
+            ball.offsetY += (ball.newOffsetY - ball.offsetY) * 0.02 * frameFactor;
 
             if(ball.timerRotate > 0){
-                ball.timerRotate--;
+                ball.timerRotate -= frameFactor;
             }else{
                 ball.timerRotate = randomIntFromInterval(30,50);
                 ball.rotateSpeedX = randomIntFromInterval(-2,2);
                 ball.rotateSpeedY = randomIntFromInterval(-2,2);
             }
 
-            ball.bgBall.x += ball.rotateSpeedX;
-            ball.bgBall.y += ball.rotateSpeedY;
+            ball.bgBall.x += ball.rotateSpeedX * frameFactor;
+            ball.bgBall.y += ball.rotateSpeedY * frameFactor;
 
             ball.bgBall.x = ball.bgBall.x < -gameSettings.drumBallRadius ? 0 : ball.bgBall.x;
             ball.bgBall.x = ball.bgBall.x > 0 ? -gameSettings.drumBallRadius : ball.bgBall.x;
@@ -1376,18 +1383,17 @@ function loopDrumBalls(){
             ball.x = posX + ball.offsetX;
             ball.y = posY + ball.offsetY;
             ball.scaleX = ball.scaleY = scale;
-            ball.angle = ball.oriAngle + rotateData.angle;
-        }
+            ball.angle = currentAngle;
     }
 
-    sortOnObject(sortArray, 'scale', false);
+	if(++drumDepthFrame >= DEPTH_SORT_INTERVAL){
+		drumDepthFrame = 0;
+		sortOnObject(drumDepthOrder, 'scale', false);
 
-    for(var n=0; n<sortArray.length; n++){
-        drawDrumBallsContainer.setChildIndex(
-            $.balls[sortArray[n].r + '_' + sortArray[n].c],
-            n
-        );
-    }
+		for(var i=0; i<drumDepthOrder.length; i++){
+			drawDrumBallsContainer.setChildIndex(drumDepthOrder[i].ball, i);
+		}
+	}
 }
 
 /*!
