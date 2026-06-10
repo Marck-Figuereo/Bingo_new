@@ -78,7 +78,8 @@ async function initMain(){
 
 var windowW=windowH=0;
 var scalePercent=0;
-const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+// const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+const dpr = 1;
 const offset = {x:0,y:0,left:0,top:0};
 
 /*!
@@ -134,8 +135,13 @@ function resizeGameFunc(){
 		gameCanvas.style.left = (offset.left/2) + "px";
 		gameCanvas.style.top = (offset.top/2) + "px";
 		
-		gameCanvas.width = stageW * dpr;
-		gameCanvas.height = stageH * dpr;
+		const realWidth = Math.round(stageW * dpr);
+		const realHeight = Math.round(stageH * dpr);
+
+		if (gameCanvas.width !== realWidth || gameCanvas.height !== realHeight) {
+			gameCanvas.width = realWidth;
+			gameCanvas.height = realHeight;
+		}
 		
 		$(window).scrollTop(0);
 		

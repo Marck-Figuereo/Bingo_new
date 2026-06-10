@@ -57,12 +57,13 @@ function initGameCanvas(w,h){
 	
 	canvasW=w;
 	canvasH=h;
-	stage = new createjs.Stage("gameCanvas",{ antialias: true });
-	
-	createjs.Touch.enable(stage);
-	stage.enableMouseOver(20);
-	stage.mouseMoveOutside = true;
-	
+	stage = new createjs.Stage("gameCanvas", { antialias: false });
+
+	createjs.Touch.disable(stage);
+	stage.enableMouseOver(0);
+	stage.mouseMoveOutside = false;
+
+	createjs.Ticker.timingMode = createjs.Ticker.RAF_SYNCHED;
 	createjs.Ticker.framerate = 60;
 	createjs.Ticker.addEventListener("tick", tick);
 }

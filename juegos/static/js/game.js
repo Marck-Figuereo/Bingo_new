@@ -1124,8 +1124,15 @@ function proceedStartDraw(result){
 
 function revealBall(){
 	
-	var newRotate = randomIntFromInterval(-180,180);
-	TweenMax.to(drawDrumBallsContainer, 3, {rotation:newRotate, ease:Expo.easeOut, overwrite:true});
+if (ENABLE_DRUM_ANIMATION) {
+    var newRotate = randomIntFromInterval(-180, 180);
+
+    TweenMax.to(drawDrumBallsContainer, 3, {
+        rotation: newRotate,
+        ease: Expo.easeOut,
+        overwrite: true
+    });
+}
 
 	drawDrumBallContainer.removeAllChildren();
 	TweenMax.to(itmDrumHole, gameSettings.revealSpeed, {delay:gameSettings.revealSpeed, rotation:360, overwrite:true, ease:Sine.easeOut, onStart:function(){
@@ -1287,10 +1294,17 @@ function revealBall(){
  * UPDATE GAME - This is the function that runs to loop game update
  * 
  */
+const ENABLE_DRUM_ANIMATION = false;
+
 function updateGame(deltaMs){
-	
-	if(!gameData.paused) loopDrumBalls(deltaMs)
-	
+
+    if (!ENABLE_DRUM_ANIMATION) {
+        return;
+    }
+
+    if (!gameData.paused) {
+        loopDrumBalls(deltaMs);
+    }
 }
 
 /*!
