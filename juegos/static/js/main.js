@@ -152,3 +152,6 @@ function resizeGameFunc(){
 
 	}, 100);	
 }
+
+// Nums_carton([2, 61, 36, 88, 12, 34, 57, 65, 71, 83, 17, 25, 41, 59, 77], '***236', 'CS 03 LA VEGA', 'itemPopup_cuatro')
+	

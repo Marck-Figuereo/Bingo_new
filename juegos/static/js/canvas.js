@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////
-// CANVAS 60
+// CANVAS itemPopup_lineD
 ////////////////////////////////////////////////////////////
 var stage;
 var canvasW=0;
@@ -40,14 +40,15 @@ var popupOverlay = null;
 
 var popupTextID = null;
 var popupTextAgencia = null;
-
-
+var popupTextJK = null
+var txtJk = null;
 
 
 /*!
  * 
  * START GAME CANVAS - This is the function that runs to setup game canvas
  * itemNumPopup 
+ * 
  */
 
 function initGameCanvas(w,h){
@@ -78,7 +79,12 @@ function initGameCanvas(w,h){
 
 const aumento_jack = (num_inicio, num_fn) => {
 
-    let duration = 2400000;
+    detener_aumento_jack();
+
+    num_inicio = Number(num_inicio) || 0;
+    num_fn = Number(num_fn) || 0;
+
+    let duration = 10100; // prueba 10 segundos primero
     let startTime = performance.now();
 
     jackpotRunning = true;
@@ -95,12 +101,15 @@ const aumento_jack = (num_inicio, num_fn) => {
 
         const currentNumber = num_inicio + easedProgress * (num_fn - num_inicio);
 
-        jkActualTxt.text = currency(currentNumber.toFixed(2));
+        txtJk.text = currency(currentNumber.toFixed(2));
+
+        stage.update(); // ESTO ES LO QUE TE FALTA
 
         if (progress < 1) {
             jackpotAnimationFrame = requestAnimationFrame(updateCount);
         } else {
             jackpotRunning = false;
+            jackpotAnimationFrame = null;
         }
     }
 
@@ -362,25 +371,26 @@ const showTextResult = (info, previousDraw, nextDraw, itemDrawSpecial, itemJkInf
 	txtInfoJk.color = "#ffffffdc" 
 	txtInfoJk.textAlign = "center";
 	txtInfoJk.textBaseline = "center";
-	txtInfoJk.text = `${info.info_jackpot.ticket}                        ${currency(info.info_jackpot.monto)}                               ${info.info_jackpot.lugar}                               ${info.info_jackpot.fecha}`;
+	txtInfoJk.text = `${info.info_ult_jackpot.ticket}                        ${currency(info.info_ult_jackpot.monto)}                               ${info.info_ult_jackpot.lugar}                               ${info.info_ult_jackpot.fecha}`;
 	
 	txtInfoJk.x = itemJkInfoResult.x - ((bounds2.width  * itemJkInfoResult.scaleX) / 2) + 950;
 	txtInfoJk.y = itemJkInfoResult.y - ((bounds2.height * itemJkInfoResult.scaleY) / 2) + 50
 	
 	resultScreenContainer.addChild(txtInfoJk);
-	console.log("Dddff");
+	
+	
 }
 
 const showDinamic = () => {
 
 	
 
-	let txtJk = new createjs.Text();
+	txtJk = new createjs.Text();
 	txtJk.font = "38px bebasregular";
 	txtJk.color = "#ffffffdc" 
 	txtJk.textAlign = "left";
 	txtJk.textBaseline = "center";
-	txtJk.text = "$15,513.23"
+	// txtJk.text = "$15,513.23"
 	
 	txtJk.x = canvasW/100 * 61;
 	txtJk.y = canvasH/100 * 10;	
@@ -409,11 +419,13 @@ const showDinamic = () => {
 
 }
 
-function Nums_carton(nums, ticket, local, Popup, ganador) {
+function Nums_carton(nums, ticket, local, Popup, JK) {
 
 
 	popupContainer.visible = true;
 
+	popupTextJK = null;
+	
 	popupTextNums = []
 	// Limpiar popup anterior
 	if (popupContainer) popupContainer.removeAllChildren();
@@ -435,9 +447,8 @@ function Nums_carton(nums, ticket, local, Popup, ganador) {
 	});
 
 
-
 	popupTextID = new createjs.Text();
-	popupTextID.font = "15px bebasregular";
+	popupTextID.font = JK ? "30px bebasregular" : "15px bebasregular"
 	popupTextID.color = "#ffffffe0";
 	popupTextID.textAlign = "center";
 	popupTextID.textBaseline = "center";
@@ -445,33 +456,44 @@ function Nums_carton(nums, ticket, local, Popup, ganador) {
 
 
 	popupTextAgencia = new createjs.Text();
-	popupTextAgencia.font = "15px bebasregular";
+	popupTextAgencia.font = JK ? "20px bebasregular" : "15px bebasregular"
 	popupTextAgencia.color = "#ffffffe0";
 	popupTextAgencia.textAlign = "center";
 	popupTextAgencia.textBaseline = "center";
 	popupTextAgencia.text = local;
 
+	
+	if(JK){
 
-	for (var i = 0; i < nums.length; i++) {
+		popupTextJK = new createjs.Text();
+		popupTextJK.font = "50px bebasregular";
+		popupTextJK.color = "#f2c356ea";
+		popupTextJK.textAlign = "center";
+		popupTextJK.textBaseline = "center";
+		popupTextJK.text = currency(nums);
 
-		var txt = new createjs.Text();
-		txt.font = "50px bebasregular";
-		txt.color = "#ffffffe0" 
-		txt.textAlign = "center";
-		txt.textBaseline = "top";
-		txt.text = nums[i];
-		
+	}else{
 
-		popupTextNums.push(txt);
+		for (var i = 0; i < nums.length; i++) {
+
+			var txt = new createjs.Text();
+			txt.font = "50px bebasregular";
+			txt.color = "#ffffffe0" 
+			txt.textAlign = "center";
+			txt.textBaseline = "top";
+			txt.text = nums[i];
+			
+
+			popupTextNums.push(txt);
+		}
 	}
-
 	popupContainer.addChild(
 		
 		popupOverlay,
 		itemPopup,
 		popupTextID,	
-		popupTextAgencia
-
+		popupTextAgencia,
+		popupTextJK,
 	
 	); for (var i = 0; i < popupTextNums.length; i++) popupContainer.addChild(popupTextNums[i]);
 	
@@ -486,17 +508,16 @@ function showResultScreen() {
     gameContainer.visible = false;
     resultScreenContainer.visible = true;
 
-    if (popupContainer) {
-        popupContainer.visible = false;
-    }
-
-    detener_aumento_jack();
+    if (popupContainer) popupContainer.visible = false;
+    
+ 
     stopSoundLoop('soundDrum');
 
     stopRender();
 }
 
 function showGameScreen() {
+
     if (!gameContainer || !resultScreenContainer) return;
 
     resultScreenContainer.visible = false;
@@ -506,7 +527,7 @@ function showGameScreen() {
 }
 
 
-function buildResultScreen(resultsData) {
+function buildResultScreen(resultsData) {console.log(resultsData);
 
     resultScreenContainer.removeAllChildren();
 
@@ -549,8 +570,6 @@ function buildResultScreen(resultsData) {
 	previousDraw.scaleY = .483;	
 
 
-
-	
     var nextDraw = new createjs.Bitmap(loader.getResult('nextDraw'));    
 	centerReg(nextDraw);
 	nextDraw.x = canvasW/100 * 50;
@@ -578,6 +597,10 @@ function buildResultScreen(resultsData) {
 	showTextResult(resultsData, previousDraw, nextDraw, specialDraw, itemJkInfoResult)
 
 	showDinamic()
+	aumento_jack(32500, 35600)
+
+	// detener_aumento_jack() 
+
 }
 
 
@@ -688,7 +711,7 @@ function buildGameCanvas(){
  
  
 
-
+	// exitBonus(draw_api.BONOS, draw_api)
 
 	//Tabla
 	itemTable = new createjs.Bitmap(loader.getResult('itemTable'));

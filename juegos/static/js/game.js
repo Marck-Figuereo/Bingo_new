@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////
-// GAME v1.4 // updateGame
+// GAME v1.4 // jkActualTxt detener_aumento_jack
 ////////////////////////////////////////////////////////////
 function stopDrumAnimation() {
 
@@ -126,15 +126,18 @@ const result_api = {
 		}, 
 		
 	
-	],info_jackpot : {
+	],info_actual_jackpot :  35600,
+	
+	info_ult_jackpot : {
 
 		monto : 25364,
 		fecha : '15/05/2026',
 		lugar : 'CS 917 PANTOJA',
 		ticket : '***H39E3A'
-	}
+		
+	},
 	
-
+//info_jackpot
 }
 
 
@@ -164,14 +167,14 @@ const draw_api = {
 
 	numbers: [
 		2, 15, 61, 36, 88, 74, 45, 9, 25, 31,
-		7, 52, 63, 18, 40, 5, 27, 69, 11, 90
-		// 33, 48, 72, 14, 56, 80, 4, 23, 67, 39,
-		// 10, 58, 21, 84, 1, 44, 76,
+		7, 52, 63, 18, 40, 5, 27, 69, 11, 90,
+		33, 48, 72, 14, 56, 80, 4, 23, 67, 39,
+		10, 58, 21, 84, 1, 44, 76,
 
-		// 3, 6, 8, 12, 13, 16, 17, 19, 20, 22,
-		// 24, 26, 28,
+		3, 6, 8, 12, 13, 16, 17, 19, 20, 22,
+		24, 26, 28,
 
-		// 29
+		29
 	],
 
 	cartones: {
@@ -203,13 +206,22 @@ const draw_api = {
 			lugar: 'CS 23 SIMON BOLIVAR',
 			id_carton: '***974',
 			tipo_ganador: 'DOBLE_LINEA',
-
 			numeros: [
 				9, 63, 40, 18, 27,
 				69, 90, 48, 14, 80,
 				17, 25, 41, 59, 77
 			]
 		},
+		39: {
+			lugar: 'CS 98 NEXT',
+			id_carton: '***632',
+			ganado: 35600,
+			numeros: [
+				9, 63, 40, 18, 27,
+				69, 90, 48, 14, 80,
+				17, 25, 41, 59, 77
+			]
+		},		
 
 		29: {
 			lugar: 'CS 974 LOS ALCARRIZOS',
@@ -225,6 +237,7 @@ const draw_api = {
 	},
 
 	BONOS: {
+		
 		88: {
 			assetId: 'itemSelectBonus1',
 			drumGlassId: 'itmDrumGlassBonus1',
@@ -240,6 +253,9 @@ const draw_api = {
 			drumGlassId: 'itmDrumGlassBonus3',
 			popUp: 'itemPopup_lineD'
 		},
+		39: {
+			popUp: 'itemPopup_jackpot'
+		},
 		29: {
 			assetId: 'itemSelectBonus4',
 			drumGlassId: 'itmDrumGlassBonus4',
@@ -254,7 +270,10 @@ const draw_api = {
 		dobleInfo : 80000,
 		bingoInfo : 160000
 
-	},info_jackpot : {
+	
+	},info_actual_jackpot :  35600,
+
+	info_ult_jackpot : {
 
 		monto : 25364,
 		fecha : '15/05/2026',
@@ -270,7 +289,7 @@ const draw_api = {
 
 const TOTAL_SLOTS = 60; 
 
-
+const JACKPOT_SUSPENSE_SECONDS = 15;
 const BONUS_SUSPENSE_SECONDS = 4; // tiempo antes de mostrar el popup
 const BONUS_POPUP_SECONDS = 4;
  
@@ -715,7 +734,7 @@ function goPage(page){
         gameContainer.visible = false;
         resultScreenContainer.visible = true;
 
-        detener_aumento_jack();
+        // detener_aumento_jack();
         stopSoundLoop('soundDrum');
 
         stopRender();
@@ -797,40 +816,60 @@ function hidePopupCarton() {
 
 function exitBonus(tipo_bns, dts) {
 
-
-	Nums_carton(dts.numeros, dts.id_carton, dts.lugar, tipo_bns, dts.tipo_ganador)
-	
-	itemPopup.x = canvasW / 2;
-	itemPopup.y = canvasH / 2;
-
-	itemPopup.scaleX = 0.5;
-	itemPopup.scaleY = 0.5;
- 
-
-	let bounds3 = itemPopup.getBounds();
-	popupTextID.x = itemPopup.x - ((bounds3.width  * itemPopup.scaleX) / 2) + 250;
-	popupTextID.y = itemPopup.y - ((bounds3.height * itemPopup.scaleY) / 2) + 435;
-
-	popupTextAgencia.x = itemPopup.x - ((bounds3.width  * itemPopup.scaleX) / 2) + 510;
-	popupTextAgencia.y = itemPopup.y - ((bounds3.height * itemPopup.scaleY) / 2) + 435;
-
-
-	var cnt = [195, 155]
-
-	for (var i = 0; i < popupTextNums.length; i++) {
-
-		popupTextNums[i].x = itemPopup.x - ((bounds3.width  * itemPopup.scaleX) / 2) + cnt[0]; //107
-		popupTextNums[i].y = itemPopup.y - ((bounds3.height * itemPopup.scaleY) / 2) + cnt[1]; //70
+	if(tipo_bns == 'itemPopup_jackpot'){
 		
-		if(cnt[0] < 731) cnt[0]+=107 
-		if(cnt[0] == 730) cnt[0] = 195, cnt[1] += 70;
+		Nums_carton(dts.ganado, dts.id_carton, dts.lugar, 'itemPopup_jackpot', true)	
+
+		itemPopup.x = canvasW / 2;
+		itemPopup.y = canvasH / 2;
+
+		itemPopup.scaleX = 0.5;
+		itemPopup.scaleY = 0.5;
+
+		let bounds3 = itemPopup.getBounds();
+		popupTextID.x = itemPopup.x - ((bounds3.width  * itemPopup.scaleX) / 2) + 170;
+		popupTextID.y = itemPopup.y - ((bounds3.height * itemPopup.scaleY) / 2) + 320;
+
+		popupTextJK.x = itemPopup.x - ((bounds3.width  * itemPopup.scaleX) / 2) + 415;
+		popupTextJK.y = itemPopup.y - ((bounds3.height * itemPopup.scaleY) / 2) + 328;
+
+		popupTextAgencia.x = itemPopup.x - ((bounds3.width  * itemPopup.scaleX) / 2) + 655;
+		popupTextAgencia.y = itemPopup.y - ((bounds3.height * itemPopup.scaleY) / 2) + 315;
+
+
+
+	}else{
+
+		Nums_carton(dts.numeros, dts.id_carton, dts.lugar, tipo_bns, false)
+
+		itemPopup.x = canvasW / 2;
+		itemPopup.y = canvasH / 2;
+
+		itemPopup.scaleX = 0.5;
+		itemPopup.scaleY = 0.5;
+
 		
-	} 	
+		let bounds3 = itemPopup.getBounds();
+		popupTextID.x = itemPopup.x - ((bounds3.width  * itemPopup.scaleX) / 2) + 250;
+		popupTextID.y = itemPopup.y - ((bounds3.height * itemPopup.scaleY) / 2) + 435;
 
+		popupTextAgencia.x = itemPopup.x - ((bounds3.width  * itemPopup.scaleX) / 2) + 510;
+		popupTextAgencia.y = itemPopup.y - ((bounds3.height * itemPopup.scaleY) / 2) + 435;
 
-	popupOverlay.graphics.clear()
-		.beginFill("rgba(0,0,0,0.65)")
-		.drawRect(0, 0, canvasW, canvasH);
+		var cnt = [195, 155]
+
+		for (var i = 0; i < popupTextNums.length; i++) {
+
+			popupTextNums[i].x = itemPopup.x - ((bounds3.width  * itemPopup.scaleX) / 2) + cnt[0]; //107
+			popupTextNums[i].y = itemPopup.y - ((bounds3.height * itemPopup.scaleY) / 2) + cnt[1]; //70
+			
+			if(cnt[0] < 731) cnt[0]+=107 
+			if(cnt[0] == 730) cnt[0] = 195, cnt[1] += 70;
+			
+		} 	
+	}	
+
+	popupOverlay.graphics.clear().beginFill("rgba(0,0,0,0.65)").drawRect(0, 0, canvasW, canvasH);
 
 }
 
@@ -1063,16 +1102,18 @@ function proceedStartDraw(result){
 
 
 	//Informacion fija para el sorteo
-	txtJkTk.text = result.info_jackpot.ticket
-	txtJkMt.text = currency(result.info_jackpot.monto)
-	txtJkMnt.text = result.info_jackpot.lugar 
-	txtJkDt.text = result.info_jackpot.fecha
+	txtJkTk.text = result.info_ult_jackpot.ticket
+	txtJkMt.text = currency(result.info_ult_jackpot.monto)
+	txtJkMnt.text = result.info_ult_jackpot.lugar 
+	txtJkDt.text = result.info_ult_jackpot.fecha
+
+	jkActualTxt.text = currency(result.info_actual_jackpot) 
 
 	cuatroInfoTxt.text = currency(result.prices.cuatroInfo);
 	lineaInfoTxt.text = currency(result.prices.lineaInfo);
 	dobleInfoTxt.text = currency(result.prices.dobleInfo);
 	bingoInfoTxt.text = currency(result.prices.bingoInfo);
-	aumento_jack(30000, 70000)
+	
 
 	
 
@@ -1196,12 +1237,9 @@ if (ENABLE_DRUM_ANIMATION) {
 					var cartonData = currentDrawData.cartones[ballNumber];
 					var bonusDelay = 0;
 
-					
 					if(bonusData){
-						
+
 						gameData.paused = true;
-						
-						bonusDelay = BONUS_SUSPENSE_SECONDS + BONUS_POPUP_SECONDS;
 
 						if($.draw['bonus' + currentSlotIndex]){
 							$.draw['bonus' + currentSlotIndex].removeAllChildren();
@@ -1226,21 +1264,27 @@ if (ENABLE_DRUM_ANIMATION) {
 
 						cartonData.tipo_ganador == 'CUATRO' ? 		cuatroInfoTxt.color = "#36eb22e0" : 
 						cartonData.tipo_ganador == 'LINEA' ? 		lineaInfoTxt.color  = "#0088ff" : 
-						cartonData.tipo_ganador == 'DOBLE_LINEA' ? 	dobleInfoTxt.color  = "#ff3737" : "" 
+						cartonData.tipo_ganador == 'DOBLE_LINEA' ? 	dobleInfoTxt.color  = "#ff3737" : 
+						cartonData.tipo_ganador == 'BINGO' ?  		bingoInfoTxt.color  = "#f2c356ea" : ""
 						
-						if(cartonData.tipo_ganador == 'BINGO'){ 		
-							bingoInfoTxt.color  = "#f2c356ea" 
-							detener_aumento_jack() 
-						}
+						const tempo = 0;
+						
+						if(bonusData.popUp != 'itemPopup_jackpot' ){ 
 
-						showDrumGlassBonus(bonusData.drumGlassId);
+							showDrumGlassBonus(bonusData.drumGlassId)
+							bonusDelay = BONUS_POPUP_SECONDS + BONUS_SUSPENSE_SECONDS  
+							tempo = bonusData.popUp != 'itemPopup_jackpot' ? BONUS_SUSPENSE_SECONDS : 0
+
+						}else bonusDelay = BONUS_POPUP_SECONDS + JACKPOT_SUSPENSE_SECONDS
+							
 
 						stopSoundLoop('soundDrum');
 
 						// Aquí está el suspenso:
 						// Primero sale itemSelectBonus, espera 4 segundos,
 						// luego aparece el popup ganador.
-						TweenMax.delayedCall(BONUS_SUSPENSE_SECONDS, ()=> exitBonus(bonusData.popUp, cartonData));
+						
+						TweenMax.delayedCall(tempo, ()=> exitBonus(bonusData.popUp, cartonData));
 						
 					}
 
