@@ -35,6 +35,8 @@ function initPreload(){
 		{src: ASSET_PATH + 'assets/DEMP/win_double_line.png', id:'itemPopup_lineD'},
 		{src: ASSET_PATH + 'assets/DEMP/win_bingo.png', id:'itemPopup_bingo'},
 		
+		{src: ASSET_PATH + 'assets/DEMP/win_jackpot.png', id:'itemPopup_jackpot'},
+		
 
 		// premios
 		{src: ASSET_PATH + 'assets/itemSelectCuatro.png', id:'itemSelectBonus1'},
